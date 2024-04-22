@@ -167,7 +167,7 @@ void CloseCb(mtd::SubReactor* s, SOCKET client) {
     }
   }
   else { //重名退出
-    std::cout << "rapead name close\n";
+    std::cout << "Duplicate username close\n";
     {
       std::unique_lock<std::shared_mutex> slock(map_mtx);
       socket_name_map.erase(client);
