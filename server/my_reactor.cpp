@@ -134,11 +134,11 @@ namespace mtd {
     thread_pool_.AddTask(std::move(fn));
   }
 
-  void SubReactor::WakeUp() {
+  void SubReactor::SendWakeSignal() {
     send(wake_, "wake up", 7, 0);
   }
 
-  void SubReactor::BeWakeUp() {
+  void SubReactor::ReceiveWakeSignal() {
     char buffer[7]{};
     int buf_len;
     buf_len = recv(monitor_, buffer, 7, 0);
@@ -176,7 +176,7 @@ namespace mtd {
           }
         }
       }
-      WakeUp();
+      SendWakeSignal();
     }
   }
 
@@ -200,7 +200,7 @@ namespace mtd {
       std::lock_guard<std::mutex> lock(fd_set_mtx_);
       FD_CLR(client, &client_set_);
     }
-    WakeUp();
+    SendWakeSignal();
   }
 
   void SubReactor::Run() {
@@ -218,7 +218,7 @@ namespace mtd {
         for (int i = 0; i < count; ++i) {
           current_sock = copy.fd_array[i];
           if (current_sock == monitor_) {
-            BeWakeUp();
+            ReceiveWakeSignal();
             continue;
           }
           {
@@ -265,7 +265,7 @@ namespace mtd {
       std::lock_guard<std::mutex> lock(fd_set_mtx_);
       if (!FD_ISSET(sock, &client_set_)) {
         FD_SET(sock, &client_set_);
-        WakeUp();
+        SendWakeSignal();
       }
     }
   }

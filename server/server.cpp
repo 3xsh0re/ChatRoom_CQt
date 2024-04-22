@@ -14,7 +14,7 @@ std::unordered_map<std::string, SOCKET> name_socket_map;
 std::shared_mutex map_mtx;
 // ----------------------------globol value------------------------------------
 
-void BoardCaseNoSelf(SOCKET client, std::string& s) {
+void BroadcastNoSelf(SOCKET client, std::string& s) {
   {
     std::shared_lock<std::shared_mutex> slock(map_mtx);
     for (auto& it : name_socket_map) {
@@ -24,7 +24,7 @@ void BoardCaseNoSelf(SOCKET client, std::string& s) {
   }
 }
 
-void BoardCase(std::string& s) {
+void Broadcast(std::string& s) {
   {
     std::shared_lock<std::shared_mutex> slock(map_mtx);
     for (auto& it : name_socket_map) {
@@ -93,7 +93,7 @@ void SendGroupMsg(mtd::SubReactor* s, SOCKET client, std::string& buf) {
         buf.c_str() + 1, buf.size() - 1);
   std::function<void()> fn = [msg]() ->void {
     std::string Msg = msg;
-    BoardCase(Msg);
+    Broadcast(Msg);
     };
   s->AddTask(std::move(fn));
 }
@@ -119,7 +119,7 @@ void UserLogin(mtd::SubReactor* s, SOCKET client, std::string& buf) {
     msg.append(1, char(23)).append(buf.c_str());
     std::function<void()> fn = [client, msg]() ->void {
       std::string Msg = msg;
-      BoardCaseNoSelf(client, Msg);
+      BroadcastNoSelf(client, Msg);
       };
     s->AddTask(std::move(fn));
     {
@@ -156,7 +156,7 @@ void CloseCb(mtd::SubReactor* s, SOCKET client) {
     msg.append(1, char(22)).append(socket_name_map[client].c_str());
     std::function<void()> fn = [client, msg]() ->void {
       std::string Msg = msg;
-      BoardCaseNoSelf(client, Msg);
+      BroadcastNoSelf(client, Msg);
       };
     s->AddTask(std::move(fn));
     {

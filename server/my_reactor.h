@@ -110,8 +110,8 @@ namespace mtd {
     void AddTask(std::function<void()>&& fn);
   private:
     void ReadSock(SOCKET client);
-    void WakeUp();
-    void BeWakeUp();
+    void SendWakeSignal();
+    void ReceiveWakeSignal();
     void Run();
     SOCKET serv_, wake_, monitor_;
     DestAddr dst_;
